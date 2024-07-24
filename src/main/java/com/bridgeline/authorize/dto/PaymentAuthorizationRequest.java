@@ -1,5 +1,6 @@
 package com.bridgeline.authorize.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,8 +12,12 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Data
 public class PaymentAuthorizationRequest {
+    @NotNull
     private BigDecimal amount;
+    @NotNull
     private String currency;
+    @NotNull
     private String paymentMethod;
-   private CardDetails cardDetails;
+    @NotNull
+    private CardDetails cardDetails;
 }
