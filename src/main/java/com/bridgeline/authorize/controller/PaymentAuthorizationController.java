@@ -16,11 +16,8 @@ public class PaymentAuthorizationController {
     @Autowired
     PaymentAuthorizationService paymentAuthorizationService;
     @PostMapping("/authorize")
-    public void authorizeCreditCard(@RequestBody PaymentAuthorizationRequest paymentAuthorizationRequest)
-            throws UnknownHostException {
+    public void authorizeCreditCard(@RequestBody PaymentAuthorizationRequest paymentAuthorizationRequest) {
         paymentAuthorizationService.authorizeCreditCard(paymentAuthorizationRequest);
-
-
     }
 
 }

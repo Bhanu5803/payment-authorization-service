@@ -2,7 +2,6 @@ package com.bridgeline.authorize.service;
 
 
 import com.bridgeline.authorize.domain.CardDetails;
-
 import com.bridgeline.authorize.domain.CardType;
 import com.bridgeline.authorize.domain.PaymentTransaction;
 import com.bridgeline.authorize.domain.Vendor;
@@ -12,64 +11,70 @@ import com.bridgeline.authorize.repository.CardDetailsRepository;
 import com.bridgeline.authorize.repository.CardTypeRepository;
 import com.bridgeline.authorize.repository.PaymentTransactionRepository;
 import com.bridgeline.authorize.repository.VendorRepository;
+import jakarta.persistence.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.random.RandomGenerator;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PaymentAuthorizationService {
     @Autowired
-    CardDetailsRepository cardDetailsRepository;
+    private VendorRepository vendorRepository;
     @Autowired
-    CardTypeRepository cardTypeRepository;
+    private CardDetailsRepository cardDetailsRepository;
     @Autowired
-    PaymentTransactionRepository paymentTransactionRepository;
+    private CardTypeRepository cardTypeRepository;
     @Autowired
-    VendorRepository vendorRepository;
+   private PaymentTransactionRepository paymentTransactionRepository;
 
-    public void authorizeCreditCard(PaymentAuthorizationRequest paymentAuthorizationRequest) throws UnknownHostException {
-        com.bridgeline.authorize.dto.CardDetails cardDetails1 = paymentAuthorizationRequest.getCardDetails();
-        CardDetails cardDetails = CardDetails.builder()
-                        .cardNumber(cardDetails1.getCardNumber())
-                        .expirationDate(cardDetails1.getExpirationDate())
-                         .cardholderName(cardDetails1.getCardholderName())
-                          .cvv(cardDetails1.getCvv())
-                            .build();
-        CardDetails savedCardDetails = cardDetailsRepository.save(cardDetails);
 
-        CardType cardType = CardType.builder()
-                .cardId(savedCardDetails.getCardId())
-                .cardName(cardDetails1.getCardName())
-                .build();
-        CardType saveCardType = cardTypeRepository.save(cardType);
-
-        Vendor vendor = Vendor.builder()
-                .vendorName("summit")
-                .vendorLocation("US")
-                .build();
-
+    public void authorizeCreditCard(PaymentAuthorizationRequest paymentAuthorizationRequest) {
+        Vendor vendor = new Vendor();
+        vendor.setVendorName("Summit");
+        vendor.setVendorLocation("US");
         Vendor saveVendor = vendorRepository.save(vendor);
+        log.info("vendor saved successfully : {}", saveVendor);
 
-        PaymentTransaction paymentTransaction = PaymentTransaction.builder()
-                .amount(paymentAuthorizationRequest.getAmount())
-                .currency(paymentAuthorizationRequest.getCurrency())
-                .createdTime(LocalDateTime.now())
-                .status(AuthorizationStatusEnum.APPROVED.name())
-                .authorizationCode(AuthorizationStatusEnum.APPROVED.getCode())
-                .ipAddress(InetAddress.getLocalHost().getHostAddress())
-                .userAgent(null)
-                .customerAccountId("null")
-                .paymentMethod(paymentAuthorizationRequest.getPaymentMethod())
-                .cardDetails(savedCardDetails)
-                .vendorId(saveVendor.getVendorId())
-                .build();
-        paymentTransactionRepository.save(paymentTransaction);
+        List<com.bridgeline.authorize.dto.CardDetails> cardDetailsList = paymentAuthorizationRequest.getCardDetailsList();
+
+        cardDetailsList.forEach(c-> {
+            CardDetails cardDetails = new CardDetails();
+            cardDetails.setCardNumber(c.getCardNumber());
+            cardDetails.setCvv(c.getCvv());
+            cardDetails.setCardholderName(c.getCardholderName());
+            cardDetails.setExpirationDate(c.getExpirationDate());
+            CardDetails saveCardDetails = cardDetailsRepository.save(cardDetails);
+
+            CardType cardType = new CardType();
+            cardType.setCardName(c.getCardName());
+            cardType.setCardId(saveCardDetails.getCardId());
+            cardType.setCardDetails(saveCardDetails);
+
+            CardType saveCardType = cardTypeRepository.save(cardType);
+            log.info("Card Type saved successfully : {}", saveCardType);
+
+            PaymentTransaction paymentTransaction = new PaymentTransaction();
+            paymentTransaction.setAmount(paymentAuthorizationRequest.getAmount());
+            paymentTransaction.setCurrency(paymentAuthorizationRequest.getCurrency());
+            paymentTransaction.setCreatedTime(LocalDateTime.now());
+            paymentTransaction.setStatus(AuthorizationStatusEnum.APPROVED.name());
+            paymentTransaction.setAuthorizationCode(AuthorizationStatusEnum.APPROVED.getCode());
+            paymentTransaction.setPaymentMethod(paymentAuthorizationRequest.getPaymentMethod());
+            paymentTransaction.setIpAddress(null);
+            paymentTransaction.setCustomerAccountId(null);
+            paymentTransaction.setVendorId(saveVendor.getVendorId());
+            paymentTransaction.setCardDetails(saveCardDetails);
+            PaymentTransaction savePaymentTransaction = paymentTransactionRepository.save(paymentTransaction);
+            log.info("Payment Transaction saved successfully : {}", savePaymentTransaction);
+        });
+
+
     }
-
 }

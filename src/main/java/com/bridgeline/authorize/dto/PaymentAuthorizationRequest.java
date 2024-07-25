@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
+
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,6 +20,5 @@ public class PaymentAuthorizationRequest {
     private String currency;
     @NotNull
     private String paymentMethod;
-    @NotNull
-    private CardDetails cardDetails;
+    private List<CardDetails> cardDetailsList;
 }
