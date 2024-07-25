@@ -36,9 +36,10 @@ public class PaymentAuthorizationService {
 
 
     public void authorizeCreditCard(PaymentAuthorizationRequest paymentAuthorizationRequest) {
-        Vendor vendor = new Vendor();
-        vendor.setVendorName("Summit");
-        vendor.setVendorLocation("US");
+        Vendor vendor = Vendor.builder()
+                .vendorName("Summit")
+                .vendorLocation("US")
+                .build();
         Vendor saveVendor = vendorRepository.save(vendor);
         log.info("vendor saved successfully : {}", saveVendor);
 
