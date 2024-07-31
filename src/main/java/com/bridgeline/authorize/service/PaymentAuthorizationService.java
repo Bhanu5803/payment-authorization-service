@@ -151,18 +151,21 @@ public class PaymentAuthorizationService {
             CardDetailsWithAdditionalData cardDetailsWithAdditionalData = new CardDetailsWithAdditionalData();
             cardDetailsWithAdditionalData.setAmount(amount1);
             cardDetailsWithAdditionalData.setCurrency(currency1);
-            com.bridgeline.authorize.dto.CardDetails cardDetails1 = new com.bridgeline.authorize.dto.CardDetails();
-            cardDetails1.setCardNumber(cardDetails.getCardNumber());
-            cardDetails1.setCvv(cardDetails.getCvv());
-            cardDetails1.setCardholderName(cardDetails.getCardholderName());
-            cardDetails1.setExpirationDate(cardDetails.getExpirationDate());
-            CardType byCardId = cardTypeRepository.findByCardId(cardDetails.getCardId());
-            cardDetails1.setCardName(byCardId.getCardName());
-            cardDetailsWithAdditionalData.setCardDetails(cardDetails1);
+            com.bridgeline.authorize.dto.CardDetails cardDetailsDto = convertDomainToDTO(cardDetails);
+            cardDetailsWithAdditionalData.setCardDetails(cardDetailsDto);
             cardDetailsWithAdditionalDataList.add(cardDetailsWithAdditionalData);
 
         });
         return cardDetailsWithAdditionalDataList;
-
+    }
+    private com.bridgeline.authorize.dto.CardDetails convertDomainToDTO(CardDetails cardDetails) {
+        com.bridgeline.authorize.dto.CardDetails cardDetails1 = new com.bridgeline.authorize.dto.CardDetails();
+        cardDetails1.setCardNumber(cardDetails.getCardNumber());
+        cardDetails1.setCvv(cardDetails.getCvv());
+        cardDetails1.setCardholderName(cardDetails.getCardholderName());
+        cardDetails1.setExpirationDate(cardDetails.getExpirationDate());
+        CardType byCardId = cardTypeRepository.findByCardId(cardDetails.getCardId());
+        cardDetails1.setCardName(byCardId.getCardName());
+        return cardDetails1;
     }
 }
