@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -121,7 +120,7 @@ public class PaymentAuthorizationService {
             cardDetails1.setCardNumber(cardDetails.getCardNumber());
             cardDetails1.setCvv(cardDetails.getCvv());
             cardDetails1.setCardholderName(cardDetails.getCardholderName());
-            cardDetails1.setExpirationDate(cardDetails1.getExpirationDate());
+            cardDetails1.setExpirationDate(cardDetails.getExpirationDate());
             Integer cardId = cardDetails.getCardId();
             CardType byCardId = cardTypeRepository.findByCardId(cardId);
             cardDetails1.setCardName(byCardId.getCardName());
