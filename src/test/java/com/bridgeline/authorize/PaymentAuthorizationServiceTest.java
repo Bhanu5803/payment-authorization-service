@@ -4,6 +4,7 @@ import com.bridgeline.authorize.domain.CardType;
 import com.bridgeline.authorize.domain.PaymentTransaction;
 import com.bridgeline.authorize.domain.Vendor;
 import com.bridgeline.authorize.dto.CardDetails;
+import com.bridgeline.authorize.dto.CardDetailsWithAdditionalData;
 import com.bridgeline.authorize.dto.PaymentAuthorizationRequest;
 import com.bridgeline.authorize.repository.CardDetailsRepository;
 import com.bridgeline.authorize.repository.CardTypeRepository;
@@ -21,10 +22,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.random.RandomGenerator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
  class PaymentAuthorizationServiceTest {
@@ -125,5 +131,92 @@ import static org.mockito.Mockito.*;
                 .save(any(PaymentTransaction.class));
 
    }
+    @Test
+    void testFindByAmount() {
+        List<PaymentTransaction> paymentTransactionList = new ArrayList<>();
+        com.bridgeline.authorize.domain.CardDetails cardDetails = new com.bridgeline.authorize.domain.CardDetails();
+        cardDetails.setCardId(1);
+        cardDetails.setCardNumber("2756678987608967");
+        cardDetails.setCvv("123");
+        cardDetails.setCardholderName("Ram");
+        cardDetails.setExpirationDate("04/25");
+        PaymentTransaction paymentTransaction = new PaymentTransaction();
+        paymentTransaction.setAmount(new BigDecimal(140.00));
+        paymentTransaction.setCurrency("EUR");
+        paymentTransaction.setCardDetails(cardDetails);
+
+        paymentTransactionList.add(paymentTransaction);
+
+        CardType cardType = new CardType();
+        cardType.setCardTypeId(1);
+        cardType.setCardId(cardDetails.getCardId());
+        cardType.setCardName("Plcc");
+        cardType.setCardDetails(cardDetails);
+
+
+        BigDecimal amount = new BigDecimal(40.00);
+
+        when(paymentTransactionRepository.findAll()).thenReturn(paymentTransactionList);
+        when(cardTypeRepository.findByCardId(any(Integer.class))).thenReturn(cardType);
+        List<CardDetails> byAmount = paymentAuthorizationService.findByAmount(amount);
+
+        assertTrue(byAmount.size()>0);
+    }
+    @Test
+    void testFindByCurrency(){
+        String currency = "USD";
+        List<PaymentTransaction> paymentTransactionList = new ArrayList<>();
+        PaymentTransaction paymentTransaction = new PaymentTransaction();
+        paymentTransaction.setCurrency("USD");
+        paymentTransaction.setAmount(new BigDecimal(140.00));
+        com.bridgeline.authorize.domain.CardDetails cardDetails1 = new com.bridgeline.authorize.domain.CardDetails();
+        cardDetails1.setCardId(1);
+        cardDetails1.setCardNumber("2756678987608967");
+        cardDetails1.setCvv("123");
+        cardDetails1.setCardholderName("Ram");
+        cardDetails1.setExpirationDate("04/25");
+        paymentTransaction.setCardDetails(cardDetails1);
+        paymentTransactionList.add(paymentTransaction);
+
+        CardType cardType = new CardType();
+        cardType.setCardTypeId(cardDetails1.getCardId());
+        cardType.setCardName("Plcc");
+        cardType.setCardDetails(cardDetails1);
+
+        when(paymentTransactionRepository.findByCurrency(any(String.class))).thenReturn(paymentTransactionList);
+        when(cardTypeRepository.findByCardId(any(Integer.class))).thenReturn(cardType);
+        List<CardDetailsWithAdditionalData> byCurrency = paymentAuthorizationService.findByCurrency(currency);
+        assertEquals(1,byCurrency.size());
+    }
+    @Test
+    void testFindByAmountOrCurrency(){
+        List<PaymentTransaction> paymentTransactionList = new ArrayList<>();
+        PaymentTransaction paymentTransaction = new PaymentTransaction();
+        paymentTransaction.setAmount(new BigDecimal(140.00));
+        paymentTransaction.setCurrency("USD");
+        com.bridgeline.authorize.domain.CardDetails cardDetails = new com.bridgeline.authorize.domain.CardDetails();
+        cardDetails.setCardId(1);
+        cardDetails.setCardNumber("2756678987608967");
+        cardDetails.setCvv("123");
+        cardDetails.setCardholderName("Ram");
+        cardDetails.setExpirationDate("04/25");
+        paymentTransaction.setCardDetails(cardDetails);
+        paymentTransactionList.add(paymentTransaction);
+
+        CardType cardType = new CardType();
+        cardType.setCardTypeId(cardDetails.getCardId());
+        cardType.setCardName("Plcc");
+        cardType.setCardDetails(cardDetails);
+
+
+        BigDecimal amount = new BigDecimal(40.00);
+        String currency = "USD";
+
+        when(paymentTransactionRepository.findAll()).thenReturn(paymentTransactionList);
+        when(cardTypeRepository.findByCardId(any(Integer.class))).thenReturn(cardType);
+        List<CardDetailsWithAdditionalData> byAmountOrCurrency = paymentAuthorizationService
+                .findByAmountOrCurrency(amount, currency);
+        assertTrue(byAmountOrCurrency.size()>0);
+    }
 }
 
