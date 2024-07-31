@@ -209,14 +209,14 @@ import static org.mockito.Mockito.*;
         cardType.setCardDetails(cardDetails);
 
 
-        BigDecimal amount = new BigDecimal(140.00);
+        BigDecimal amount = new BigDecimal(40.00);
         String currency = "USD";
-        List<CardDetailsWithAdditionalData> byAmountOrCurrency = paymentAuthorizationService
-                .findByAmountOrCurrency(amount, currency);
+
         when(paymentTransactionRepository.findAll()).thenReturn(paymentTransactionList);
         when(cardTypeRepository.findByCardId(any(Integer.class))).thenReturn(cardType);
-        assertTrue(byAmountOrCurrency.size()<=0);
-        //assertEquals(1,byAmountOrCurrency.size());
+        List<CardDetailsWithAdditionalData> byAmountOrCurrency = paymentAuthorizationService
+                .findByAmountOrCurrency(amount, currency);
+        assertTrue(byAmountOrCurrency.size()>0);
     }
 }
 

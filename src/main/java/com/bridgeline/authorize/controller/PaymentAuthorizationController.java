@@ -6,7 +6,6 @@ import com.bridgeline.authorize.dto.PaymentAuthorizationRequest;
 import com.bridgeline.authorize.service.PaymentAuthorizationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;

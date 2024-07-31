@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -87,7 +89,7 @@ public class PaymentAuthorizationService {
         List<com.bridgeline.authorize.dto.CardDetails> cardDetailsList = new ArrayList<>();
 
         List<PaymentTransaction> paymentTransactions = paymentTransactionList.stream()
-                .filter(p -> p.getAmount().compareTo(amount) > 0).collect(Collectors.toList());
+                .filter(p -> p.getAmount().compareTo(amount) > 0).toList();
 
         paymentTransactions.forEach(p-> {
             CardDetails cardDetails = p.getCardDetails();
@@ -109,7 +111,7 @@ public class PaymentAuthorizationService {
     public List<CardDetailsWithAdditionalData> findByCurrency(String currency) {
         List<PaymentTransaction> byCurrency = paymentTransactionRepository.findByCurrency(currency);
         List<PaymentTransaction> paymentTransactionListUSD = byCurrency.stream().filter(p -> p.getCurrency().equalsIgnoreCase("USD"))
-                .collect(Collectors.toList());
+                .toList();
         List<CardDetailsWithAdditionalData> cardDetailsWithAdditionalData  = new ArrayList<>();
         paymentTransactionListUSD.forEach(p->
         {
@@ -140,9 +142,9 @@ public class PaymentAuthorizationService {
         List<PaymentTransaction> paymentTransactionListAmountUsd = byAmountOrCurrency.stream()
                 .filter(a -> amount==null || a.getAmount().compareTo(amount) > 0)
                 .filter(a -> currency==null || a.getCurrency().equalsIgnoreCase(currency))
-                .collect(Collectors.toList());
+                .toList();
         List<CardDetailsWithAdditionalData> cardDetailsWithAdditionalDataList = new ArrayList<>();
-        paymentTransactionListAmountUsd.forEach(p->{
+        paymentTransactionListAmountUsd.forEach(p-> {
             BigDecimal amount1 = p.getAmount();
             String currency1 = p.getCurrency();
             CardDetails cardDetails = p.getCardDetails();
